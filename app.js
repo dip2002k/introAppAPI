@@ -1,31 +1,38 @@
-// Import the Express module
-import express from "express";
-import cors from "cors";
-
-// Import the routes modules
-import userRoutes from "./routes/user.js";
-import authRoutes from "./routes/auth.js";
-import wellnessRoutes from "./routes/wellness.js";
-// Create an Express application
+const express = require('express');
 const app = express();
 
-// Use the PORT environment variable or 3000
-const PORT = process.env.PORT || 3000;
+// Middleware
+app.use(express.json());
 
-app.use(express.urlencoded({ extended: false })); // To parse the incoming requests with urlencoded payloads. For example, form data
-app.use(express.json()); // To parse the incoming requests with JSON payloads. For example, REST API requests
-app.use(cors()); // So the website localhost port has access to make req and res to our API port
+// Routes
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/posts', require('./routes/postRoutes'));
+app.use('/api/tags', require('./routes/tagRoutes'));
+app.use('/api/comments', require('./routes/commentRoutes'));
+app.use('/api/categories', require('./routes/categoryRoutes'));
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use('/api/wellness', wellnessRoutes);
-
-// Start the server on port 3000
-app.listen(PORT, () => {
-  console.log(
-    `Server is listening on port ${PORT}. Visit http://localhost:${PORT}`,
-  );
+// Health check
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Blog API is running!',
+    endpoints: {
+      users: '/api/users',
+      posts: '/api/posts',
+      tags: '/api/tags', 
+      comments: '/api/comments',
+      categories: '/api/categories'
+    }
+  });
 });
 
-// Export the Express application. May be used by other modules. For example, API testing
-export default app;
+// Handle 404
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
+
+module.exports = app;
