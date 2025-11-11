@@ -1,0 +1,29 @@
+model Customer {
+  customerId String   @id @unique
+  firstname  String
+  lastname  String
+  phone      String
+  address    String
+  email      String   @unique
+  password   String   // Added for customer authentication
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Relationships
+  sales Sale[]
+  
+  @@map("customers")
+}
+
+// Keep other models the same...
+model Employee {
+  employeeId Int      @id @default(autoincrement())
+  fname      String
+  lname      String
+  phone      String
+  role       String
+  password   String
+  createdAt  DateTime @default(now())
+  
+  @@map("employees")
+}
