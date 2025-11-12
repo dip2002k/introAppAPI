@@ -1,5 +1,4 @@
-
-
+// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,32 +7,123 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model Customer {
-  customerId String   @id @unique
+  customerId String    @id @default(uuid())
   firstname  String
-  lastname  String
+  lastname   String
   phone      String
   address    String
-  email      String   @unique
-  password   String   // Added for customer authentication
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  email      String    @unique
+  password   String
+  role       UserRole  @default(NORMAL)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
   
-  // Relationships
- // sales Sale[]
+  
   
   @@map("customers")
 }
 
-// Keep other models the same...
 model Employee {
-  employeeId Int      @id @default(autoincrement())
+  employeeId String    @id @default(uuid())
   fname      String
   lname      String
   phone      String
-  role       String
+  role       UserRole  @default(NORMAL)
   password   String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
+  
   
   @@map("employees")
+}
+
+model Car {
+  carId     String    @id @default(uuid())
+  make      String
+  model     String
+  year      Int
+  price     Float
+  status    CarStatus @default(AVAILABLE) // Enum field
+  createdAt DateTime  @default(now())
+  
+ 
+  @@map("cars")
+}
+
+model Sale {
+  saleId     String     @id @default(uuid())
+  saleDate   DateTime   @default(now())
+  totalPrice Float
+  status     SaleStatus @default(COMPLETED) // Enum field
+  
+  // One-to-Many Relationships
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [customerId], onDelete: Cascade)
+  
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+  
+  carId      String
+  car        Car      @relation(fields: [carId], references: [carId], onDelete: Cascade)
+  
+  @@map("sales")
+}
+
+model Service {
+  serviceId   String       @id @default(uuid())
+  serviceType ServiceType  // Enum field
+  description String
+  cost        Float
+  serviceDate DateTime     @default(now())
+  
+  // Many-to-Many Relationship with Customer
+  customers   CustomerService[]
+  
+  @@map("services")
+}
+
+// Junction table for Many-to-Many relationship
+model CustomerService {
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [customerId], onDelete: Cascade)
+  
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [serviceId], onDelete: Cascade)
+  
+  @@id([customerId, serviceId])
+  @@map("customer_services")
+}
+
+// Enum Definitions (Required - you need at least one enum field)
+enum UserRole {
+  ADMIN
+  NORMAL
+}
+
+enum CarStatus {
+  AVAILABLE
+  SOLD
+  MAINTENANCE
+  RESERVED
+}
+
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum ServiceType {
+  OIL_CHANGE
+  TIRE_ROTATION
+  BRAKE_SERVICE
+  ENGINE_REPAIR
+  TRANSMISSION_SERVICE
+  ELECTRICAL_SYSTEM
+  AIR_CONDITIONING
+  SUSPENSION_REPAIR
+  GENERAL_MAINTENANCE
+  DETAILING
 }

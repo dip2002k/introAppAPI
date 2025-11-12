@@ -1,26 +1,35 @@
+// app.js
 const express = require('express');
 const cors = require('cors');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // Your SvelteKit frontend
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
 app.use('/api/customers', require('./routes/customerRoutes'));
+app.use('/api/employees', require('./routes/employeeRoutes'));
+app.use('/api/cars', require('./routes/carRoutes'));
+app.use('/api/sales', require('./routes/saleRoutes'));
+app.use('/api/services', require('./routes/serviceRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
 
 // Health check
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Car Dealership API is running!',
+    timestamp: new Date().toISOString(),
     endpoints: {
       customers: '/api/customers',
-      customer_signup: 'POST /api/customers/signup',
-      customer_login: 'POST /api/customers/login',
-      get_customers: 'GET /api/customers',
-      get_customer: 'GET /api/customers/:id',
-      update_customer: 'PUT /api/customers/:id',
-      delete_customer: 'DELETE /api/customers/:id'
+      employees: '/api/employees', 
+      cars: '/api/cars',
+      sales: '/api/sales',
+      services: '/api/services',
+     
     }
   });
 });
